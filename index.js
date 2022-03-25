@@ -8,51 +8,58 @@ const connection = mysql.createConnection({
     database: 'C12_Employee_db'
 });
 
+function init() {
 
-function showPortal () {
-    inquirer.prompt([
-        {
-            type: "list",
-            message: "Welcome to the Employee Management Portal! What task would you like to perform?",
-            choices: [
-                "* VIEW: All Departments *", 
-                "* VIEW: All Roles *", 
-                "* VIEW: All Employees *",
-                "* ADD: Department *",
-                "* ADD: Role *",
-                "* ADD: Employee *",
-                "* UPDATE: Employee Role *",
-            ],
-            name: "portalMain",
-        },
-    ])
-    .then((response) =>{
-    
-        var choice = response.portalMain
-    
-        if (choice === "* VIEW: All Departments *") {
-            viewDepartments();
-        }
-        if (choice === "* VIEW: All Roles *") {
-            viewRoles();
-        }
-        if (choice === "* VIEW: All Employees *") {
-            viewEmployees();
-        }
-        if (choice === "* ADD: Department *") {
-            addDepartment();
-        }
-        if (choice === "* ADD: Role *") {
-            addRole();
-        }
-        if (choice === "* ADD: Employee *") {
-            addEmployee();
-        }
-        if (choice === "* UPDATE: Employee Role *") {
-            updateEmployee();
-        }
-    });
+    //Init funtion sets the portal function to run after the app has been started
+    showPortal();
+
+    function showPortal () {
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "Welcome to the Employee Management Portal! What task would you like to perform?",
+                choices: [
+                    "* VIEW: All Departments *", 
+                    "* VIEW: All Roles *", 
+                    "* VIEW: All Employees *",
+                    "* ADD: Department *",
+                    "* ADD: Role *",
+                    "* ADD: Employee *",
+                    "* UPDATE: Employee Role *",
+                ],
+                name: "portalMain",
+            },
+        ])
+        .then((response) =>{
+        
+            var choice = response.portalMain
+        
+            if (choice === "* VIEW: All Departments *") {
+                viewDepartments();
+            }
+            if (choice === "* VIEW: All Roles *") {
+                viewRoles();
+            }
+            if (choice === "* VIEW: All Employees *") {
+                viewEmployees();
+            }
+            if (choice === "* ADD: Department *") {
+                addDepartment();
+            }
+            if (choice === "* ADD: Role *") {
+                addRole();
+            }
+            if (choice === "* ADD: Employee *") {
+                addEmployee();
+            }
+            if (choice === "* UPDATE: Employee Role *") {
+                updateEmployee();
+            }
+        });
+    };
 };
+
+
 
 
 function viewDepartments() {
@@ -152,7 +159,7 @@ function addRole () {
         //Response is collected and posted to the department table with auto generated id (Primary Key)
         
         var preSQL = "SELECT * FROM `department` WHERE `name` = "+roleDept+"";
-        var roleDepID = [];
+        let roleDepID = [];
         var roleDepRem = roleDepID[0];
 
         connection.query(preSQL,
@@ -168,7 +175,7 @@ function addRole () {
         );
 
         var sql = "INSERT INTO role (title, salary, department_id) VALUE ?";
-        var value = [roleTitle, roleSalary, roleDepRem];
+        let value = [roleTitle, roleSalary, roleDepRem];
 
         connection.query(sql, [value], function (err, result) {
             if (err) 
@@ -177,7 +184,7 @@ function addRole () {
             console.log("Congratulations! "+value+" has successfully been added to the database");
         });
     });
-}
+};
 
 function addEmployee () {
     inquirer.prompt([
@@ -206,7 +213,7 @@ function addEmployee () {
         //Response is collected and posted to the department table with auto generated id (Primary Key)
         
         var preSQL1 = "SELECT * FROM `role` WHERE `title` = "+empRole+"";
-        var empDepIDar = [];
+        let empDepIDar = [];
         var empDepID = empDepIDar[0];
         connection.query(preSQL1,
             
@@ -218,10 +225,10 @@ function addEmployee () {
                     // console.log(results);
                     // console.log(fields); 
             }
-        )
+        );
 
         var sql = "INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUE ?";
-        var value = [empFirst, empLast, empMan, empDepID];
+        let value = [empFirst, empLast, empMan, empDepID];
 
         connection.query(sql, [value], function (err, result) {
             if (err) 
@@ -233,36 +240,74 @@ function addEmployee () {
 };
 
 function updateEmployee () {
+    //sets an empty array as a 
+    let empListRes = [];
     connection.query(
-        'SELECT * FROM `employee`',
+        'SELECT first_name, last_name FROM `employee`',
             function(err, results, fields) {
+                // let empLast = results.last_name;
+                // let empFirst = results.first_name;
+                // let empFull = [empLast, empFirst];
+                empListRes.push(results)
                 console.log(results); // results contains rows returned by server
                 console.log(fields); // fields contains extra meta data about results, if available
             }
       );
-}
+    empList.forEach(choiceBuild());
+        function choiceBuild(data) {
+          let choiceForm = ""+data.first_name+""+data.last_name+"";
+          empListFull.push(choiceForm);
+        };
+    let empListFull = [];
 
-// create the connection to database
-
-  
-  // simple query
-  connection.query(
-    'SELECT * FROM `table` WHERE `name` = "Page" AND `age` > 45',
-        function(err, results, fields) {
-            console.log(results); // results contains rows returned by server
-            console.log(fields); // fields contains extra meta data about results, if available
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "( * UPDATE EMPLOYEE * ) Which EMPLOYEE would you like to UPDATE?",
+            choices: empListFull,
+            name: "empUpdate",
+        },
+        {
+            type: "input",
+            message: "( * UPDATE EMPLOYEE * ) Please enter the UPDATED employee's ROLE title:",
+            name: "empRoleUP",
+        },
+        {
+            type: "input",
+            message: "( * UPDATE EMPLOYEE * ) Please enter the UPDATED employee's MANAGER's ID# _leave blank if role is manager_:",
+            name: "empManUP",
         }
-  );
-  
-  // with placeholder
-  connection.query(
-    'SELECT * FROM `table` WHERE `name` = ? AND `age` > ?',
-    ['Page', 45],
-    function(err, results) {
-      console.log(results);
-    }
-  );
+    ])
+    .then(({empUpdate, empRoleUP, empManUP}) => {
+
+        //get role_id from role table using role title
+        var preSQL1 = "SELECT * FROM `role` WHERE `title` = "+empRoleUP+"";
+        let empUpIDar = [];
+        var empDepID = empUpIDar[0];
+        connection.query(preSQL1,
+            
+                function(err, results, fields) {
     
+                    empUpIDar.push(results.id);
     
-    
-    init();
+                    // // Logs to test
+                    // console.log(results);
+                    // console.log(fields); 
+            }
+        )
+        console.log(empUpdate);
+        let sql = "UPDATE employee SET role_id = ?, manager_Id = ?, WHERE first_name = ?";
+        let value = [empDepID, empManUP, empUpdate];
+        connection.query(sql, [value], function (err, result) {
+            if (err) 
+                throw err;
+
+            console.log("Congratulations! "+empUpdate+", has successfully been updated in the database");
+        });
+    })
+};
+
+
+
+        
+init();
