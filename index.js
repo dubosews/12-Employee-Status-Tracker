@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const cTable = require('console.table');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -57,12 +58,12 @@ inquirer.prompt([
 
 function viewDepartments() {
     connection.query(
-    'SELECT * FROM `department`',
-    function(err, results, fields) {
-      console.log(results); // results contains rows returned by server
-      console.log(fields); // fields contains extra meta data about results, if available
+        'SELECT * FROM `department`',
+        function(err, results, fields) {
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
     }
-  );
+    );
 };
 
 function viewRoles() {
