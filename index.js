@@ -68,7 +68,7 @@ function viewDepartments() {
         'SELECT * FROM `department`',
             function(err, results, fields) {
 
-                cTable.table(results);
+                console.table(results);
 
                 // // Logs to test
                 // console.log(results);
@@ -121,17 +121,21 @@ function addDepartment () {
             name: "newDepartment",
         }
     ])
-    .then((response) =>{
+    .then(({newDepartment}) =>{
         //Response is collected and posted to the department table with auto generated id (Primary Key)
 
-        var sql = "INSERT INTO department (dep_name) VALUE ?";
-        var value = [response];
+        var sql = "INSERT INTO department (dep_name) VALUE ('"+newDepartment+"')";
+        // var value = [];
+        // value.push(newDepartment);
+        console.log(newDepartment);
+        
 
-        connection.query(sql, [value], function (err, result) {
+        connection.query(sql, [newDepartment], function (err, result) {
             if (err) 
                 throw err;
 
             console.log("Congratulations! "+result+" has successfully been added to the database");
+            showPortal();
         });
     });
     
@@ -147,7 +151,7 @@ function addRole () {
         },
         {
             type: "input",
-            message: "( * New Role * ) Please enter the Salary of the new role:",
+            message: "( * New Role * ) Please enter the Salary of the new role (example: 1000.99):",
             name: "roleSalary",
         },
         {
@@ -175,7 +179,7 @@ function addRole () {
             }
         );
 
-        var sql = "INSERT INTO role (title, salary, department_id) VALUE ?";
+        var sql = "INSERT INTO `role` (title, salary, department_id) VALUE ?";
         let value = [roleTitle, roleSalary, roleDepRem];
 
         connection.query(sql, [value], function (err, result) {
@@ -183,6 +187,7 @@ function addRole () {
                 throw err;
 
             console.log("Congratulations! "+value+" has successfully been added to the database");
+            showPortal();
         });
     });
 };
@@ -228,7 +233,7 @@ function addEmployee () {
             }
         );
 
-        var sql = "INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUE ?";
+        var sql = "INSERT INTO `employee` (first_name, last_name, manager_id, role_id) VALUE ?";
         let value = [empFirst, empLast, empMan, empDepID];
 
         connection.query(sql, [value], function (err, result) {
@@ -244,7 +249,7 @@ function updateEmployee () {
     //sets an empty array as a 
     let empListRes = [];
     connection.query(
-        'SELECT first_name, last_name FROM `employee`',
+        'SELECT `first_name`, `last_name` FROM `employee`',
             function(err, results, fields) {
                 // let empLast = results.last_name;
                 // let empFirst = results.first_name;
@@ -282,10 +287,11 @@ function updateEmployee () {
     .then(({empUpdate, empRoleUP, empManUP}) => {
 
         //get role_id from role table using role title
-        var preSQL1 = "SELECT * FROM `role` WHERE `title` = "+empRoleUP+"";
+        var preSQL1 = "SELECT * FROM `role` WHERE `title` = ?";
+        let value = [empRoleUP];
         let empUpIDar = [];
         var empDepID = empUpIDar[0];
-        connection.query(preSQL1,
+        connection.query(preSQL1, [value],
             
                 function(err, results, fields) {
     
@@ -298,8 +304,8 @@ function updateEmployee () {
         )
         console.log(empUpdate);
         let sql = "UPDATE employee SET role_id = ?, manager_Id = ?, WHERE first_name = ?";
-        let value = [empDepID, empManUP, empUpdate];
-        connection.query(sql, [value], function (err, result) {
+        let value2 = [empDepID, empManUP, empUpdate];
+        connection.query(sql, [value2], function (err, result) {
             if (err) 
                 throw err;
 
