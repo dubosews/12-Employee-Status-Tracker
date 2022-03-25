@@ -134,8 +134,8 @@ function addRole () {
     inquirer.prompt([
         {
             type: "input",
-            message: "( * New Role * ) Please enter the NAME of the new role:",
-            name: "roleName",
+            message: "( * New Role * ) Please enter the TITLE of the new role:",
+            name: "roleTitle",
         },
         {
             type: "input",
@@ -148,30 +148,89 @@ function addRole () {
             name: "roleDept",
         }
     ])
-    .then((response) =>{
+    .then(({roleTitle, roleSalary, roleDept}) =>{
         //Response is collected and posted to the department table with auto generated id (Primary Key)
+        
+        var preSQL = "SELECT * FROM `department` WHERE `name` = "+roleDept+"";
+        var roleDepID = [];
+        var roleDepRem = roleDepID[0];
 
-        var sql = "INSERT INTO department (dep_name) VALUE ?";
-        var value = [response];
+        connection.query(preSQL,
+            
+                function(err, results, fields) {
+    
+                    roleDepID.push(results.id);
+    
+                    // // Logs to test
+                    // console.log(results);
+                    // console.log(fields); 
+            }
+        );
+
+        var sql = "INSERT INTO role (title, salary, department_id) VALUE ?";
+        var value = [roleTitle, roleSalary, roleDepRem];
 
         connection.query(sql, [value], function (err, result) {
             if (err) 
                 throw err;
 
-            console.log("Congratulations! "+result+" has successfully been added to the database");
+            console.log("Congratulations! "+value+" has successfully been added to the database");
         });
     });
 }
 
 function addEmployee () {
-    connection.query(
-        'SELECT * FROM `employee`',
-        function(err, results, fields) {
-          console.log(results); // results contains rows returned by server
-          console.log(fields); // fields contains extra meta data about results, if available
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "( * New Employee * ) Please enter the new employee's FIRST NAME:",
+            name: "empFirst",
+        },
+        {
+            type: "input",
+            message: "( * New Employee * ) Please enter the new employee's LAST NAME:",
+            name: "empLast",
+        },
+        {
+            type: "input",
+            message: "( * New Employee * ) Please enter the new employee's ROLE title:",
+            name: "empRole",
+        },
+        {
+            type: "input",
+            message: "( * New Employee * ) Please enter the new employee's MANAGER's ID# _leave blank if role is manager_:",
+            name: "empMan",
         }
-      );
-}
+    ])
+    .then(({empFirst, empLast, empRole, empMan}) =>{
+        //Response is collected and posted to the department table with auto generated id (Primary Key)
+        
+        var preSQL1 = "SELECT * FROM `role` WHERE `title` = "+empRole+"";
+        var empDepIDar = [];
+        var empDepID = empDepIDar[0];
+        connection.query(preSQL1,
+            
+                function(err, results, fields) {
+    
+                    empDepIDar.push(results.id);
+    
+                    // // Logs to test
+                    // console.log(results);
+                    // console.log(fields); 
+            }
+        )
+
+        var sql = "INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUE ?";
+        var value = [empFirst, empLast, empMan, empDepID];
+
+        connection.query(sql, [value], function (err, result) {
+            if (err) 
+                throw err;
+
+            console.log("Congratulations! "+empLast+","+empf+" has successfully been added to the database");
+        });
+    });
+};
 
 function updateEmployee () {
     connection.query(
