@@ -104,24 +104,63 @@ function viewEmployees() {
 };
 
 function addDepartment () {
-    inquirer.prompt
-    connection.query(
-        'SELECT * FROM `employee`',
-        function(err, results, fields) {
-          console.log(results); // results contains rows returned by server
-          console.log(fields); // fields contains extra meta data about results, if available
+
+    // Inquirer prompt to collect department data being added to table
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "( * New Department * ) Please enter the new department name:",
+            name: "newDepartment",
         }
-      );
-}
+    ])
+    .then((response) =>{
+        //Response is collected and posted to the department table with auto generated id (Primary Key)
+
+        var sql = "INSERT INTO department (dep_name) VALUE ?";
+        var value = [response];
+
+        connection.query(sql, [value], function (err, result) {
+            if (err) 
+                throw err;
+
+            console.log("Congratulations! "+result+" has successfully been added to the database");
+        });
+    });
+    
+};
 
 function addRole () {
-    connection.query(
-        'SELECT * FROM `employee`',
-        function(err, results, fields) {
-          console.log(results); // results contains rows returned by server
-          console.log(fields); // fields contains extra meta data about results, if available
+    // Inquirer prompt to collect department data being added to table
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "( * New Role * ) Please enter the NAME of the new role:",
+            name: "roleName",
+        },
+        {
+            type: "input",
+            message: "( * New Role * ) Please enter the Salary of the new role:",
+            name: "roleSalary",
+        },
+        {
+            type: "input",
+            message: "( * New Role * ) Please enter the DEPARTMENT NAME of the new role:",
+            name: "roleDept",
         }
-      );
+    ])
+    .then((response) =>{
+        //Response is collected and posted to the department table with auto generated id (Primary Key)
+
+        var sql = "INSERT INTO department (dep_name) VALUE ?";
+        var value = [response];
+
+        connection.query(sql, [value], function (err, result) {
+            if (err) 
+                throw err;
+
+            console.log("Congratulations! "+result+" has successfully been added to the database");
+        });
+    });
 }
 
 function addEmployee () {
