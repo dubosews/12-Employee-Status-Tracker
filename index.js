@@ -85,13 +85,8 @@ function viewRoles() {
     connection.query(
         'SELECT * FROM `role`',
             function(err, results, fields) {
-                
                 console.table(results);
-                if (!results){}
-                else
-                    showPortal();
-
-                // // console.logs to test response data
+                if (!results){console.log(err)}
                 // console.log(results);
                 // console.log(fields); 
             }
@@ -101,23 +96,18 @@ function viewRoles() {
 
 function viewEmployees() {
 
-    connection.query(
-        'SELECT * FROM `employee`',
-            function(err, results, fields) {
-                console.log(results); // results contains rows returned by server
-                console.log(fields); // fields contains extra meta data about results, if available
-            }
+    connection.query('SELECT * FROM `employee`',
+        function(err, results, fields) {
+
+            console.table(results);
+
+            console.log(results); // results contains rows returned by server
+            console.log(fields); // fields contains extra meta data about results, if available
+        }
     );
 
-    connection.query(
-        'SELECT * FROM `role`',
-            function(err, results, fields) {
-                console.log(results); // results contains rows returned by server
-                console.log(fields); // fields contains extra meta data about results, if available
-            }
-    );
     showPortal();
-
+    
 };
 
 function addDepartment () {
@@ -179,8 +169,8 @@ function addRole () {
         fetchDepart();
     
         function fetchDepart() {
-            let departmentID1;
-            departmentID = departmentID1;
+            let departmentIdInner;
+            departmentID = departmentIdInner;
             connection.query(preSQL, function(err, results, fields) {
 
                 var test = results;
@@ -192,7 +182,7 @@ function addRole () {
         };
 
         function roleResLoop (test) {
-            let departmentID1;
+            let departmentIdLoop;
             
                 for (let i = 0; i < test.length; i++) {
                     console.log("test loop id: ",test[i].id);
@@ -200,19 +190,21 @@ function addRole () {
                     var passData = test[i].id;
                     
                     if (test[i].dep_name === roleDept){
-                        departmentID1 = {id: test[i].id, value: test[i].dep_name};
-                        postRole(passData);
+                        departmentIdLoop = {id: test[i].id, value: test[i].dep_name};
+                        postRole(passData, departmentIdLoop);
                     }
                 }
         };
         
-        function postRole (depid) {
+        function postRole (depId, depIdLoop) {
             console.log("after query: ", depid);
+            console.log("after query: ", depIdLoop);
+
 
             var sql = "INSERT INTO role (title, salary, department_id) VALUE (?)";
-            let roleDep = depid;
+            let roleDepId = depId;
             
-            let valueRole = [roleTitle, roleSalary, roleDep];
+            let valueRole = [roleTitle, roleSalary, roleDepId];
 
             console.log("value "+valueRole);
 
@@ -225,7 +217,7 @@ function addRole () {
             });
         };
     });
-    };
+};
 
 
 function addEmployee () {
@@ -253,32 +245,68 @@ function addEmployee () {
     ])
     .then(({empFirst, empLast, empRole, empMan}) =>{
         //Response is collected and posted to the department table with auto generated id (Primary Key)
-        
-        var preSQL1 = "SELECT * FROM `role` WHERE `title` = "+empRole+"";
-        let empDepIDar = [];
-        var empDepID = empDepIDar[0];
-        connection.query(preSQL1,
+        var preSQLrole = "SELECT * FROM role";
+        console.log("preSQL (role): "+ preSQL);
+
+        let roleID;
+
+        fetchRoleID();
+    
+        function fetchRoleID() {
+            let roleIdInner;
+            roleID = roleIdInner;
+            connection.query(preSQLrole, function(err, results, fields) {
+
+                var roleIdResults = results;
+                var roleInput = empRole;
+
+                console.log(results);
+                console.log(roleIdResults);
+                // console.log("roleDepId: ", roleDepID);
+                // console.log("depID: ", departmentID);
+
+
+                roleResLoop(roleIdResults, roleInput);
+                
+            });
+        };
+
+        function roleResLoop (roleIdResults, roleInput) {
+            let roleIdLoop;
+            console.log(roleIdResults);
+            console.log(roleInput);
             
-                function(err, results, fields) {
-    
-                    empDepIDar.push(results.id);
-    
-                    // // Logs to test
-                    // console.log(results);
-                    // console.log(fields); 
-            }
-        );
+                for (let i = 0; i < roleIdResults.length; i++) {
+                    console.log("roleIdResults loop id: ",roleIdResults[i].department_id);
+                    console.log("test loop department name: ",roleIdResults[i].title);
+                    var roleLoopData = roleIdResults[i].id;
+                    
+                    if (roleIdResults[i].title === roleInput){
+                        const roleIdOBJ = {id: roleIdResults[i].id, value: roleIdResults[i].title};
+                        postRole(roleLoopData, roleIdOBJ);
+                    }
+                }
+        };
+        
+        function postRole (roleLoopData, roleLoopOBJ) {
+            console.log("after query (roleLoopData): ", roleLoopData);
+            console.log("after query (roleLoopOBJ): "+roleLoopOBJ);
 
-        var sql = "INSERT INTO `employee` (first_name, last_name, manager_id, role_id) VALUE ?";
-        let value = [empFirst, empLast, empMan, empDepID];
+            var sql = "INSERT INTO employee (first_name, last_name, manager_id, role_id) VALUE (?)";
+            let empRoleId = roleLoopData;
+            
+            let valueEmployee = [empFirst, empLast, empMan, empRoleId];
 
-        connection.query(sql, [value], function (err, result) {
-            if (err) 
-                throw err;
+            console.log("value (Employee): "+valueEmployee);
 
-            console.log("Congratulations! "+empLast+","+empf+" has successfully been added to the database");
-            showPortal();
-        });
+            connection.query(sql, [valueEmployee], function (err, result) {
+                if (err) 
+                    throw err;
+
+                console.log("Congratulations! "+result+" has successfully been added to the database");
+                showPortal();
+            });
+        };
     });
 };
 
