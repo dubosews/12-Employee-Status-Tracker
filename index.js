@@ -58,23 +58,27 @@ function init() {
             }
         });
     };
-};
+
 
 
 
 
 function viewDepartments() {
+    
     connection.query(
         'SELECT * FROM `department`',
             function(err, results, fields) {
 
                 console.table(results);
-
+                if (!results){}
+                else
+                    showPortal();
                 // // Logs to test
                 // console.log(results);
                 // console.log(fields); 
         }
     );
+   
 };
 
 function viewRoles() {
@@ -82,13 +86,17 @@ function viewRoles() {
         'SELECT * FROM `role`',
             function(err, results, fields) {
                 
-                cTable.table(results);
+                console.table(results);
+                if (!results){}
+                else
+                    showPortal();
 
                 // // console.logs to test response data
                 // console.log(results);
                 // console.log(fields); 
             }
     );
+    showPortal();
 };
 
 function viewEmployees() {
@@ -108,6 +116,7 @@ function viewEmployees() {
                 console.log(fields); // fields contains extra meta data about results, if available
             }
     );
+    showPortal();
 
 };
 
@@ -162,35 +171,62 @@ function addRole () {
     ])
     .then(({roleTitle, roleSalary, roleDept}) =>{
         //Response is collected and posted to the department table with auto generated id (Primary Key)
-        
-        var preSQL = "SELECT * FROM `department` WHERE `name` = "+roleDept+"";
-        let roleDepID = [];
-        var roleDepRem = roleDepID[0];
+        var preSQL = "SELECT * FROM department";
+        console.log("preSQL "+preSQL);
 
-        connection.query(preSQL,
+        let departmentID;
+
+        fetchDepart();
+    
+        function fetchDepart() {
+            let departmentID1;
+            departmentID = departmentID1;
+            connection.query(preSQL, function(err, results, fields) {
+
+                var test = results;
+                console.log(results);
+                roleResLoop(test, roleDept);
+                // console.log("roleDepId: ", roleDepID);
+                // console.log("depID: ", departmentID);
+            });
+        };
+
+        function roleResLoop (test) {
+            let departmentID1;
             
-                function(err, results, fields) {
-    
-                    roleDepID.push(results.id);
-    
-                    // // Logs to test
-                    // console.log(results);
-                    // console.log(fields); 
-            }
-        );
+                for (let i = 0; i < test.length; i++) {
+                    console.log("test loop id: ",test[i].id);
+                    console.log("test loop department name: ",test[i].dep_name);
+                    var passData = test[i].id;
+                    
+                    if (test[i].dep_name === roleDept){
+                        departmentID1 = {id: test[i].id, value: test[i].dep_name};
+                        postRole(passData);
+                    }
+                }
+        };
+        
+        function postRole (depid) {
+            console.log("after query: ", depid);
 
-        var sql = "INSERT INTO `role` (title, salary, department_id) VALUE ?";
-        let value = [roleTitle, roleSalary, roleDepRem];
+            var sql = "INSERT INTO role (title, salary, department_id) VALUE (?)";
+            let roleDep = depid;
+            
+            let valueRole = [roleTitle, roleSalary, roleDep];
 
-        connection.query(sql, [value], function (err, result) {
-            if (err) 
-                throw err;
+            console.log("value "+valueRole);
 
-            console.log("Congratulations! "+value+" has successfully been added to the database");
-            showPortal();
-        });
+            connection.query(sql, [valueRole], function (err, result) {
+                if (err) 
+                    throw err;
+
+                console.log("Congratulations! "+result+" has successfully been added to the database");
+                showPortal();
+            });
+        };
     });
-};
+    };
+
 
 function addEmployee () {
     inquirer.prompt([
@@ -241,6 +277,7 @@ function addEmployee () {
                 throw err;
 
             console.log("Congratulations! "+empLast+","+empf+" has successfully been added to the database");
+            showPortal();
         });
     });
 };
@@ -310,10 +347,11 @@ function updateEmployee () {
                 throw err;
 
             console.log("Congratulations! "+empUpdate+", has successfully been updated in the database");
+            showPortal();
         });
     })
 };
-
+};
 
 
         
