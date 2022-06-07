@@ -1,4 +1,6 @@
 # 12: Employee SQL Tracker (Node.js)
+<img src="./img/employeeTrackerScreenshot.png" style="width:60%"></img>
+<br>
 
 ## Table of Contents
   1. [Description](#description) 
