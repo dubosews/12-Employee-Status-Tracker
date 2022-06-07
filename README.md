@@ -1,4 +1,4 @@
-# DUBOSEWS_Challenge 12: Employee SQL Tracker (Node.js)
+# 12: Employee SQL Tracker (Node.js)
 
 ## Table of Contents
   1. [Description](#description) 
